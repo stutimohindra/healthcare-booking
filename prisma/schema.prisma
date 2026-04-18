@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model Patient {
+  id        Int       @id @default(autoincrement())
+  name      String    @db.VarChar(255)
+  email     String    @unique @db.VarChar(255)
+  phoneNo   String?   @map("phone_no") @db.VarChar(50)
+  country   String?   @db.VarChar(100)
+  language  String?   @db.VarChar(100)
+  relatives Json?
+  birthDate DateTime? @map("birth_date") @db.Date
+  sex       String?   @db.VarChar(50)
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+  bookings  Booking[]
+
+  @@map("patients")
+}
+
+model Doctor {
+  id                Int       @id @default(autoincrement())
+  name              String    @db.VarChar(255)
+  clinicName        String?   @map("clinic_name") @db.VarChar(255)
+  openHours         Json?     @map("open_hours")
+  speciality        String?   @db.VarChar(255)
+  description       String?   @db.Text
+  email             String?   @db.VarChar(255)
+  spokenLanguages   Json?     @map("spoken_languages")
+  feeType           String?   @map("fee_type") @db.VarChar(100)
+  website           String?   @db.VarChar(500)
+  picture           String?   @db.VarChar(500)
+  contactNumber     String?   @map("contact_number") @db.VarChar(50)
+  faxNumber         String?   @map("fax_number") @db.VarChar(50)
+  acceptNewPatients Boolean?  @default(true) @map("accept_new_patients")
+  street            String?   @db.VarChar(255)
+  postalCode        String?   @map("postal_code") @db.VarChar(20)
+  city              String?   @db.VarChar(100)
+  country           String?   @db.VarChar(100)
+  addressExtra      String?   @map("address_extra") @db.Text
+  transportation    Json?
+  additionalInfo    String?   @map("additional_info") @db.Text
+  createdAt         DateTime? @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt         DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+  bookings          Booking[]
+
+  @@map("doctors")
+}
+
+model Booking {
+  id               Int      @id @default(autoincrement())
+  patientId        Int      @map("patient_id")
+  doctorId         Int      @map("doctor_id")
+  tag              String   @db.VarChar(255)
+  slot             DateTime @db.DateTime(0)
+  firstTimePatient Boolean  @default(false) @map("first_time_patient")
+  status           String   @default("hold") @db.VarChar(20)
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+  patient          Patient  @relation(fields: [patientId], references: [id])
+  doctor           Doctor   @relation(fields: [doctorId], references: [id])
+
+  @@index([patientId], map: "bookings_patient_id_idx")
+  @@index([doctorId], map: "bookings_doctor_id_idx")
+  @@map("bookings")
+}
